@@ -37,10 +37,22 @@ def why_does_the_issue_matter():
     """ reasonable ask: I shouldn't be forced to read the body of an unauthorized request.
     problem: if I abort a request with a body, I've just ensured a WinError 10054 for some of my users.
     """
-    print(request.authorization)
-    print(request.json)
-    body = jsonify({"now": int(time.time())})
-    return body, 200
+    def request_is_authorized():
+        auth = request.authorization
+        if auth:
+            username = auth.username
+            password = auth.password
+            print(username, password)
+            return True
+        else:
+            return False
+
+    if request_is_authorized():
+        print(request.json)
+        body = jsonify({"now": int(time.time())})
+        return body, 200
+    else:
+        abort(401)
 
 
 if __name__ == '__main__':
