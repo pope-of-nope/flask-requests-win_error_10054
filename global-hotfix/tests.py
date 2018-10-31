@@ -17,25 +17,6 @@ def error_filter(e):
             return False
 
 
-# def test_case(f):
-#     @wraps(f)
-#     def decorated(*args, **kwargs):
-#         try:
-#             result = f(*args, **kwargs)
-#         except requests.exceptions.ConnectionError as e:
-#             if error_filter(e):
-#                 print("test result: ", e)
-#             else:
-#                 raise e
-#         else:
-#             if not isinstance(result, bool):
-#                 raise TypeError(result)
-#             else:
-#                 print("test result: ", result)
-#                 return result
-#     return decorated
-
-
 def assert_true(f):
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -105,7 +86,7 @@ def run_tests():
             res = requests.get(url)
             return res.status_code == code
 
-        @assert_10054_error
+        @assert_true
         def run_post_test(code):
             """ if the server doesn't read "request.json()" then the issue occurs. """
             url = fubar_error_url(code)
@@ -184,7 +165,7 @@ def run_tests():
                 res = requests.get(url)
                 return res.status_code == 401
 
-            @assert_10054_error
+            @assert_true
             def run_post_test():
                 """ this is another Win Error : ( """
                 url = why_it_matters_url()
