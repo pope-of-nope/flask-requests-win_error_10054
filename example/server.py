@@ -1,6 +1,4 @@
 from flask import Flask, jsonify, request, Response, abort
-from functools import wraps
-from werkzeug.exceptions import HTTPException
 
 
 app = Flask('app')
@@ -8,6 +6,7 @@ app = Flask('app')
 
 @app.route("/fubar/error/<int:code>", methods=["GET", "POST"])
 def fubar_error(code):
+    """ example of the issue. (GET works; POST does not.) """
     if 400 <= code <= 599:
         if request.method == 'GET':
             return abort(code)  # works.
@@ -19,12 +18,12 @@ def fubar_error(code):
 
 @app.route("/working/error/<int:code>", methods=["GET", "POST"])
 def working_error(code):
+    """ example of how to fix the issue. (GET works; POST does too.) """
     if 400 <= code <= 599:
         if request.method == 'GET':
             return abort(code)  # continues to work.
         elif request.method == "POST":
-            trash_it = request.json  # this is the only thing that suffices to solve the problem.
-            print(trash_it)
+            somehow_this_fixes_it = request.json  # this is the only thing that suffices to solve the problem.
             abort(code)  # this will work (now that we've read the request body.)
     else:
         raise ValueError("invalid error code.")
