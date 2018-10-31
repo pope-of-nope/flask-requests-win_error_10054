@@ -31,7 +31,7 @@ OR: WHAT LEGITIMATE USE CASE IS THERE FOR IGNORING THE BODY OF A POST, PUT OR DE
 
 Here's the one I ran into: adding authorization filters to my flask routes.
 - Suppose I write a Flask route that checks the authorization header. If this header is bad, abort the request with a 401 code immediately.
-- But wait! If you abort before you read the request body, you'll blow things up for affected client connections!
+- But wait! If I abort before you read the request body, then I've blown my client's connections!
 - And now I'm forced to choose between processing untrusted input vs supporting my test code (which I wrote in python.)
 
 ## FINAL NOTES
