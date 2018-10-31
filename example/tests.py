@@ -95,6 +95,7 @@ def run_tests():
     def run_fubar_error_tests():
         @assert_true
         def run_get_test(code):
+            """ this issue should never occur with GET requests. """
             url = fubar_error_url(code)
             print("\nGET ", url)
             res = requests.get(url)
@@ -102,6 +103,7 @@ def run_tests():
 
         @assert_10054_error
         def run_post_test(code):
+            """ if the server doesn't read "request.json()" then the issue occurs. """
             url = fubar_error_url(code)
             print("\nPOST ", url)
             res = requests.post(url, json={"doesn't": "matter"})
@@ -122,6 +124,7 @@ def run_tests():
     def run_working_error_tests():
         @assert_true
         def run_get_test(code):
+            """ this issue should never occur with GET requests. """
             url = working_error_url(code)
             print("\nGET ", url)
             res = requests.get(url)
@@ -129,6 +132,7 @@ def run_tests():
 
         @assert_true
         def run_post_test(code):
+            """ if the server reads "request.json()" then the issue goes away. """
             url = working_error_url(code)
             print("\nPOST ", url)
             res = requests.post(url, json={"doesn't": "matter"})

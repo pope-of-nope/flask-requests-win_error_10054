@@ -23,7 +23,8 @@ def working_error(code):
         if request.method == 'GET':
             return abort(code)  # continues to work.
         elif request.method == "POST":
-            trash_it = request.json()  # this is the only thing that suffices to solve the problem.
+            trash_it = request.json  # this is the only thing that suffices to solve the problem.
+            print(trash_it)
             abort(code)  # this will work (now that we've read the request body.)
     else:
         raise ValueError("invalid error code.")
