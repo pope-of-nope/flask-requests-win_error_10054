@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, request, Response, abort
+import time
 
 
 app = Flask('app')
@@ -27,6 +28,19 @@ def working_error(code):
             abort(code)  # this will work (now that we've read the request body.)
     else:
         raise ValueError("invalid error code.")
+
+
+# the above two examples are sufficient to demonstrate the issue.
+# what follows are more examples.
+@app.route("/fubar/auth", methods=["GET", "POST"])
+def why_does_the_issue_matter():
+    """ reasonable ask: I shouldn't be forced to read the body of an unauthorized request.
+    problem: if I abort a request with a body, I've just ensured a WinError 10054 for some of my users.
+    """
+    print(request.authorization)
+    print(request.json)
+    body = jsonify({"now": int(time.time())})
+    return body, 200
 
 
 if __name__ == '__main__':

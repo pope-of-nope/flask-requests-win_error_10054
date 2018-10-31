@@ -91,6 +91,10 @@ def working_error_url(code):
     return make_url("working/error/{code}".format(code=code))
 
 
+def why_it_matters_url():
+    return make_url("fubar/auth")
+
+
 def run_tests():
     def run_fubar_error_tests():
         @assert_true
@@ -150,8 +154,33 @@ def run_tests():
         run_post_test(405)
         run_post_test(409)
 
+    def run_why_it_matters_tests():
+        def run_authorized():
+            @assert_true
+            def run_get_test():
+                """ this issue should never occur with GET requests. """
+                url = why_it_matters_url()
+                print("\nGET ", url)
+                res = requests.get(url, auth=('username', 'password'))
+                return res.status_code == 200
+
+            @assert_true
+            def run_post_test():
+                """ if the server reads "request.json()" then the issue goes away. """
+                url = why_it_matters_url()
+                print("\nPOST ", url)
+                res = requests.post(url, json={"doesn't": "matter"}, auth=('username', 'password'))
+                # print(res.json())
+                return res.status_code == 200
+
+            run_get_test()
+            run_post_test()
+
+        run_authorized()
+
     run_fubar_error_tests()
     run_working_error_tests()
+    run_why_it_matters_tests()
 
 if __name__ == '__main__':
     run_tests()
