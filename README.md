@@ -9,38 +9,32 @@ Probably not, unless the following are all true:
 
 ## STILL READING?
 If that sounds like you, then clone this repo and try running the server/tests under "example":
--  python ./example/server.py  # run the server first
--  python ./example/tests.py  # the run the tests
+-  python ./example/server.py  # first, run the server
+-  python ./example/tests.py  # next, run the tests
 
 If you see any tests "FAIL" then this is the repository you're looking for.
 
 ## WHY IS THIS HAPPENING?
-If your flask route returns a response without reading the request body, the client-side connectino blows up.
-I created this repository to bypass second-guessing. This is simply what I'm observing, and I'm not trying to blame anyone's library.
-I've been using requests/flask for over a year now, and ran into this issue quite suddenly. (I lost 2 days because I trusted they weren't the problem.)
+The client's connection blows up if it sends a request body but the server ignores the body. This is specifically something in how Flask and Requests interact (either directly or by some deeper interaction of their dependencies.) 
+
+The issue disappears if you send the request from another client (for example, Postman worked just fine for me.)
+
+I don't know why these libraries work this way. But I do know that you can work around the issue by reading the request body. (This workaround isn't ideal--see "why this is a problem.")
 
 ## HOW DO I FIX IT.
 "workaround.py" contains two options. 
-- "global_hotfix" contains an example how to fix the issue for every route (using an "@app.before_request" decorator.)
-- "route-hotfix" contains an example how to fix the issue for individual routes (using a "@hotfix" decorator after your "@app.route(...)" decorator.)
+- the "global-hotfix" directory contains an example how to fix the issue for every route (using an "@app.before_request" decorator.)
+- the "route-hotfix" directory contains an example how to fix the issue for individual routes (using a "@hotfix" decorator after your "@app.route(...)" decorator.)
 
-Probably not. The error is environment specific. 
-  The error (keywords):
-    - An existing connection was forcibly closed by the remote host.
-    - WinError 10054
+## WHAT LEGITIMATE USE CASE IS THERE FOR IGNORING THE BODY OF A POST, PUT OR DELETE REQUEST?
+Here's one: I want to minimize my code's exposure to unauthorized users, right?
+- Suppose I write a Flask route that checks the authorization header. If this header is bad, abort the request with a 401 code immediately.
+- But wait! If you abort before you read the request body, you'll blow things up for affected client connections!
+- And now I'm forced to choose between processing untrusted input vs supporting my test code (which I wrote in python.)
 
-  My environment:
-  - Windows 7
-  - Python 3.6.2
-  - Requests 2.18.4
-  - Flask 0.12.2
+## FINAL NOTES
+- I will update this project if I find a better solution.
+- I haven't tried replicating the issue on other versions of python, flask or requests.
+- This code is provided as-is.
+- Use at your own risk.
 
-If you're using those libraries, you can test 
-But you can test it by running the following code.
-  python ./example/server.py  # run the server first
-  python ./example/tests.py  # the run the tests
-
-If you see "FAIL" in those tests, congratulations! This project has the solution to your WinError 10054.
-I
-If you've run into the WinError 10054 
-I ran into a very strange bug 
