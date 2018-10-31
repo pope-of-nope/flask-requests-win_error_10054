@@ -181,14 +181,15 @@ def run_tests():
                 """ this issue should never occur with GET requests. """
                 url = why_it_matters_url()
                 print("\nGET ", url)
-                res = requests.get(url, auth=('username', 'password'))
+                res = requests.get(url)
                 return res.status_code == 401
 
-            @assert_true
+            @assert_10054_error
             def run_post_test():
+                """ this is another Win Error : ( """
                 url = why_it_matters_url()
                 print("\nPOST ", url)
-                res = requests.post(url, json={"doesn't": "matter"}, auth=('username', 'password'))
+                res = requests.post(url, json={"doesn't": "matter"})
                 # print(res.json())
                 return res.status_code == 401
 
