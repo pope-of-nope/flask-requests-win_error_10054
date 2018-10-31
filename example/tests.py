@@ -3,16 +3,6 @@ import flask
 from functools import wraps
 
 
-# def test_case(f):
-#     @wraps(f)
-#     def decorated(*args, **kwargs):
-#         result = f(*args, **kwargs)
-#         if not isinstance(result, bool):
-#             raise TypeError(result)
-#         else:
-#             print("test result: ", result)
-#     return decorated
-
 def error_filter(e):
     """ we only want to catch the Win Error 10054. """
     if not isinstance(e, requests.exceptions.ConnectionError):
@@ -27,23 +17,23 @@ def error_filter(e):
             return False
 
 
-def test_case(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        try:
-            result = f(*args, **kwargs)
-        except requests.exceptions.ConnectionError as e:
-            if error_filter(e):
-                print("test result: ", e)
-            else:
-                raise e
-        else:
-            if not isinstance(result, bool):
-                raise TypeError(result)
-            else:
-                print("test result: ", result)
-                return result
-    return decorated
+# def test_case(f):
+#     @wraps(f)
+#     def decorated(*args, **kwargs):
+#         try:
+#             result = f(*args, **kwargs)
+#         except requests.exceptions.ConnectionError as e:
+#             if error_filter(e):
+#                 print("test result: ", e)
+#             else:
+#                 raise e
+#         else:
+#             if not isinstance(result, bool):
+#                 raise TypeError(result)
+#             else:
+#                 print("test result: ", result)
+#                 return result
+#     return decorated
 
 
 def assert_true(f):
@@ -78,16 +68,6 @@ def assert_10054_error(f):
 
     return decorated
 
-# def expected_error_filter(f):
-#     @wraps(f)
-#     def decorated(*args, **kwargs):
-#         try:
-#             return f(*args, **kwargs)
-#         except requests.exceptions.ConnectionError as e:
-#             print(e)
-#             raise e
-#     return decorated
-
 
 if flask.__version__ != '0.12.2':
     print("note: you're using a different version of 'flask' than is in the requirements.txt file.")
@@ -116,12 +96,14 @@ def run_tests():
         @assert_true
         def run_get_test(code):
             url = fubar_error_url(code)
+            print("\nGET ", url)
             res = requests.get(url)
             return res.status_code == code
 
         @assert_10054_error
         def run_post_test(code):
             url = fubar_error_url(code)
+            print("\nPOST ", url)
             res = requests.post(url, json={"doesn't": "matter"})
             return res.status_code == code
 
@@ -137,8 +119,35 @@ def run_tests():
         run_post_test(405)
         run_post_test(409)
 
+    def run_working_error_tests():
+        @assert_true
+        def run_get_test(code):
+            url = working_error_url(code)
+            print("\nGET ", url)
+            res = requests.get(url)
+            return res.status_code == code
+
+        @assert_true
+        def run_post_test(code):
+            url = working_error_url(code)
+            print("\nPOST ", url)
+            res = requests.post(url, json={"doesn't": "matter"})
+            return res.status_code == code
+
+        run_get_test(400)
+        run_get_test(401)
+        run_get_test(404)
+        run_get_test(405)
+        run_get_test(409)
+
+        run_post_test(400)
+        run_post_test(401)
+        run_post_test(404)
+        run_post_test(405)
+        run_post_test(409)
 
     run_fubar_error_tests()
+    run_working_error_tests()
 
 if __name__ == '__main__':
     run_tests()

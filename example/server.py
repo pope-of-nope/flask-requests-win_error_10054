@@ -17,7 +17,7 @@ def fubar_error(code):
         raise ValueError("invalid error code.")
 
 
-@app.route("/works/error/<int:code>", methods=["GET", "POST"])
+@app.route("/working/error/<int:code>", methods=["GET", "POST"])
 def working_error(code):
     if 400 <= code <= 599:
         if request.method == 'GET':
