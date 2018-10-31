@@ -3,15 +3,90 @@ import flask
 from functools import wraps
 
 
+# def test_case(f):
+#     @wraps(f)
+#     def decorated(*args, **kwargs):
+#         result = f(*args, **kwargs)
+#         if not isinstance(result, bool):
+#             raise TypeError(result)
+#         else:
+#             print("test result: ", result)
+#     return decorated
+
+def error_filter(e):
+    """ we only want to catch the Win Error 10054. """
+    if not isinstance(e, requests.exceptions.ConnectionError):
+        return False
+    else:
+        try:
+            if e.args[0].args[1].args[0] == 10054:
+                return True
+            else:
+                return False
+        except:
+            return False
+
+
 def test_case(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        result = f(*args, **kwargs)
-        if not isinstance(result, bool):
-            raise TypeError(result)
+        try:
+            result = f(*args, **kwargs)
+        except requests.exceptions.ConnectionError as e:
+            if error_filter(e):
+                print("test result: ", e)
+            else:
+                raise e
         else:
-            print("test result: ", result)
+            if not isinstance(result, bool):
+                raise TypeError(result)
+            else:
+                print("test result: ", result)
+                return result
     return decorated
+
+
+def assert_true(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        try:
+            result = f(*args, **kwargs)
+            if isinstance(result, bool) and result:
+                print("pass. should/did: True")
+            else:
+                print("FAIL. should: True, did: False)")
+            return result
+        except Exception as e:
+            print("FAIL. should: True, did: ", e)
+            return e
+
+    return decorated
+
+
+def assert_10054_error(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        try:
+            result = f(*args, **kwargs)
+            print("FAIL. should: 10054 error, did: ", result)
+        except Exception as e:
+            if error_filter(e):
+                print("pass. should/did: ", e)
+            else:
+                print("FAIL. should: 10054 error, did: ", e)
+            return e
+
+    return decorated
+
+# def expected_error_filter(f):
+#     @wraps(f)
+#     def decorated(*args, **kwargs):
+#         try:
+#             return f(*args, **kwargs)
+#         except requests.exceptions.ConnectionError as e:
+#             print(e)
+#             raise e
+#     return decorated
 
 
 if flask.__version__ != '0.12.2':
@@ -38,13 +113,13 @@ def working_error_url(code):
 
 def run_tests():
     def run_fubar_error_tests():
-        @test_case
+        @assert_true
         def run_get_test(code):
             url = fubar_error_url(code)
             res = requests.get(url)
             return res.status_code == code
 
-        @test_case
+        @assert_10054_error
         def run_post_test(code):
             url = fubar_error_url(code)
             res = requests.post(url, json={"doesn't": "matter"})
@@ -53,8 +128,14 @@ def run_tests():
         run_get_test(400)
         run_get_test(401)
         run_get_test(404)
-        run_get_test(409)
         run_get_test(405)
+        run_get_test(409)
+
+        run_post_test(400)
+        run_post_test(401)
+        run_post_test(404)
+        run_post_test(405)
+        run_post_test(409)
 
 
     run_fubar_error_tests()
