@@ -26,8 +26,10 @@ I don't know why these libraries work this way. But I do know that you can work 
 - the "global-hotfix" directory contains an example how to fix the issue for every route (using an "@app.before_request" decorator.)
 - the "route-hotfix" directory contains an example how to fix the issue for individual routes (using a "@hotfix" decorator after your "@app.route(...)" decorator.)
 
-## WHAT LEGITIMATE USE CASE IS THERE FOR IGNORING THE BODY OF A POST, PUT OR DELETE REQUEST?
-Here's one: I want to minimize my code's exposure to unauthorized users, right?
+## WHY IS THIS A PROBLEM?
+OR: WHAT LEGITIMATE USE CASE IS THERE FOR IGNORING THE BODY OF A POST, PUT OR DELETE REQUEST?
+
+Here's the one I ran into: adding authorization filters to my flask routes.
 - Suppose I write a Flask route that checks the authorization header. If this header is bad, abort the request with a 401 code immediately.
 - But wait! If you abort before you read the request body, you'll blow things up for affected client connections!
 - And now I'm forced to choose between processing untrusted input vs supporting my test code (which I wrote in python.)
