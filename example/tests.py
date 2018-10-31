@@ -166,7 +166,6 @@ def run_tests():
 
             @assert_true
             def run_post_test():
-                """ if the server reads "request.json()" then the issue goes away. """
                 url = why_it_matters_url()
                 print("\nPOST ", url)
                 res = requests.post(url, json={"doesn't": "matter"}, auth=('username', 'password'))
@@ -176,7 +175,28 @@ def run_tests():
             run_get_test()
             run_post_test()
 
+        def run_anonymous():
+            @assert_true
+            def run_get_test():
+                """ this issue should never occur with GET requests. """
+                url = why_it_matters_url()
+                print("\nGET ", url)
+                res = requests.get(url, auth=('username', 'password'))
+                return res.status_code == 401
+
+            @assert_true
+            def run_post_test():
+                url = why_it_matters_url()
+                print("\nPOST ", url)
+                res = requests.post(url, json={"doesn't": "matter"}, auth=('username', 'password'))
+                # print(res.json())
+                return res.status_code == 401
+
+            run_get_test()
+            run_post_test()
+
         run_authorized()
+        run_anonymous()
 
     run_fubar_error_tests()
     run_working_error_tests()

@@ -5,6 +5,11 @@ import time
 app = Flask('app')
 
 
+@app.errorhandler(401)
+def unauthorized(e):
+    return jsonify({"message": "Not Authorized"}), 401
+
+
 @app.route("/fubar/error/<int:code>", methods=["GET", "POST"])
 def fubar_error(code):
     """ example of the issue. (GET works; POST does not.) """
@@ -52,6 +57,7 @@ def why_does_the_issue_matter():
         body = jsonify({"now": int(time.time())})
         return body, 200
     else:
+        print("not authorized!")
         abort(401)
 
 
