@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request, Response, abort
 import time
+from workaround import hotfix, global_hotfix
 
 
 app = Flask('app')
@@ -8,6 +9,11 @@ app = Flask('app')
 @app.errorhandler(401)
 def unauthorized(e):
     return jsonify({"message": "Not Authorized"}), 401
+
+
+@app.before_request
+def apply_hotfix():
+    global_hotfix()
 
 
 @app.route("/fubar/error/<int:code>", methods=["GET", "POST"])
